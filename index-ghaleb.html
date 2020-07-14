@@ -1,0 +1,234 @@
+<html>
+  <head>
+  <meta charset="UTF-8">
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <title>FreeLence</title>
+
+    <style>
+      #video-background {
+        position: relative;
+        display: block;
+        width: 100%;
+        object-fit: fill;
+        height: 300px;
+        margin-bottom: 0px;
+      }
+
+      .btn-primary-outline {
+        background-color: transparent;
+        border-color: #ccc;
+        color: white;
+        width: 200px;
+        border-radius: 0px;
+        padding: 15px;
+        border: 2px solid white;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div style="height: 320px;">
+      <video id="video-background" preload="" muted="" autoplay="" loop="">
+        <source src="header-video.mp4" type="video/mp4" />
+      </video>
+
+      <div class="container" style="position: relative; top: -175px;">
+        <h1 style="color: white;">
+          Select what you need to accomplish your job
+        </h1>
+        <p style="color: white;">Share us your career and Sign Up</p>
+        <div class="text-center">
+          <input
+            type="button"
+            class="btn btn-primary-outline"
+            value="click me"
+            id="clickme"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="container well">
+<div class="col-md-5"><button class="translate" id="en" onclick="checkLanguage()">English</button></div>
+<div class="col-md-7"><button class="translate" id="ar" onclick="checkLanguage()">Arabic</button></div>
+    </div>
+
+    <div class="container">
+      <div class="row" style="border: 1px solid black;">
+        <div class="col-md-1 col-md-offset-1"></div>
+        <div id="result" class="col-md-10"></div>
+        <div class="col-md-1 col-md-offset-1"></div>
+      </div>
+    </div>
+
+    <script>
+      function myMap() {
+        navigator.geolocation.getCurrentPosition((position) => {
+          a = position.coords.latitude;
+          b = position.coords.longitude;
+        });
+      }
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRXv8qnvSo2gB9DkNzI3B4d4CpLKWbkJU&callback=myMap"></script>
+
+    <script>
+      $("#clickme").click(function () {
+        window.open("signup.html");
+      });
+
+      $(document).ready(function () {
+        $.ajax({
+          type: "get",
+          dataType: "json",
+          url: "displayalljobs.php",
+          success: function (data) {
+            buildPage(data);
+          },
+        });
+      });
+
+      //Constants of Class names
+      const col6Class = "col-md-6",
+            col12Class = "col-md-12";
+
+      var language="en";
+	  
+	  //Map from desired labels to column names in the database
+      const labelsToColumns = {
+        'Name :'         : 'perName',
+        'Family :'       : 'perFamily',
+        'Email :'        : 'perUserName',
+        'Phone Number :' : 'perPhoneNumber',
+        'Location :'     : 'locName',
+        'Job :'          : 'jobName',
+        'Description :'  : 'description'
+      };
+	  
+
+
+      //Objects for element styles
+      const userBlockStyle = {
+          borderBottom: "2px solid black",
+          padding: "15px",
+          marginBottom: "25px",
+          marginRight: "55px",
+        },
+        infoRowStyle = {
+          borderBottom: "1px solid black",
+          padding: "10px",
+        },
+        mapContinerStyle = {
+          border: "1px solid black",
+          height: "400px",
+          overflow: "hidden",
+        };
+
+      //loops over the passed data and appends "user block" which contains the user's info and location map
+      function buildPage(data) {
+        let result = document.getElementById("result");
+        for (let key in data) {
+          result.appendChild(buildUserBlock(data[key]));
+        }
+      }
+
+      //Returns a div which contains two sub-divs: one for the user info and one for the location map
+      function buildUserBlock(record) {
+        let userBlock = document.createElement("div");
+
+        userBlock.classList.add(col12Class);
+        userBlock.appendChild(buildInfoBlock(record));
+        userBlock.appendChild(buildMapBlock(record));
+
+        return styleElement(userBlock, userBlockStyle);
+      }
+
+      //Returns a div that contains the location map
+      function buildMapBlock(record) {
+        let mapBlock = document.createElement("div"),
+          mapContainer = document.createElement("div");
+
+        showLocation(mapContainer, record.x, record.y);
+
+        mapBlock.classList.add([col12Class, "text-center"]);
+        mapBlock.appendChild(styleElement(mapContainer, mapContinerStyle));
+        return mapBlock;
+      }
+
+	  
+	  
+      //Returns a div that contains the user's info
+      function buildInfoBlock(record) {
+        let infoBlock = document.createElement("div");
+        infoBlock.classList.add(col6Class);
+		
+        for (let label in labelsToColumns) {
+          let col = labelsToColumns[label];
+          infoBlock.appendChild(buildInfoRow(label, record[col]));
+        }
+
+        return infoBlock;
+      }
+
+      //Returns a div that contains one of the user's details (name, email, location, etc...)
+      function buildInfoRow(label, value) {
+        let lblTitle = document.createElement("label"),
+          lblValue = document.createElement("label"),
+          rowDiv = document.createElement("div");
+
+        lblTitle.innerHTML = `${label}&nbsp;`;
+        lblValue.innerText = value;
+
+        rowDiv.appendChild(lblTitle);
+        rowDiv.appendChild(lblValue);
+
+        return styleElement(rowDiv, infoRowStyle);
+      }
+
+      //Utility Methods
+      function styleElement(elem, style) {
+        for (let propKey in style) {
+          elem.style[propKey] = style[propKey];
+        }
+        return elem;
+      }
+
+      function showLocation(mapContainer, lat, long) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          var mapProp = {
+            center: new google.maps.LatLng(lat, long),
+            zoom: 15,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+          };
+
+          var mapMark = {
+            position: new google.maps.LatLng(lat, long),
+          };
+
+          var map = new google.maps.Map(mapContainer, mapProp);
+
+          var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(lat, long),
+            map: map,
+          });
+        });
+      }
+    </script>
+	
+	<script>
+$(".translate").click(function(){
+language=$(this).attr("id");
+alert(language);
+
+
+});
+   
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,346 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/main.css" type="text/css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.3.min.js" style="text/javascript"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<title>FreeLence</title>
+
+<script>
+
+function myMap() {
+				navigator.geolocation.getCurrentPosition(showPosition);
+				}
+				
+				function showPosition(position) {
+				a= position.coords.latitude; 
+				b= position.coords.longitude;
+				}
+				
+</script>
+
+
+<script>
+
+        let arrLang = {
+            en: {
+                'Name' 												: 'Name :',
+                'Family' 											: 'Family :',
+                'Phone Number' 										: 'Phone Number :',
+				'Show Location' 									: 'Show Location',
+				'Click Me' 											: 'Sign Up',
+				'ab'												: 'Select what you need to accomplish your job',
+				'ba'												: 'Share us your career and Sign Up',
+				'email'												: 'email',
+				'job'												: 'Job',
+				'Description'										: 'Description',
+				'Location'											: 'Location',
+				'chooseLang'										: 'Select Your Language'
+				
+            },
+
+            ar: {
+                'Name' 												: 'الاسم :',
+                'Family' 											: 'العائلة :',
+                'Phone Number' 										: 'رقم الهاتف :',
+				'Show Location' 									: 'انظر الخريطة',
+				'Click Me' 											: 'انقر هنا',
+				'ab'												:'اختر العمل الذي تريد واستكمله',
+				'ba'												:'شاركنا خبرتك وانقر أدناه وأملأ استمارتك',
+				'email'												: 'البريد الالكتروني',
+				'job'												: 'المهنة',
+				'Description'										: 'شرح إضافي',
+				'Location'										: 'المكان',
+				'chooseLang'										: 'اختر اللغة التي تريد'
+            }
+        }
+
+    $(function() {
+        let lang =localStorage.getItem('language');
+        //changeLanguage(lang);
+
+
+     $('#testLanguage').change(function(){
+         langs = $(this).children("option:selected").val();
+         localStorage.setItem('language', langs);
+         changeLanguage(langs);
+     });
+	 
+
+    function changeLanguage(lang){
+	if(lang=="en")
+	$("body").attr("dir", "ltr");
+	else
+	$("body").attr("dir", "rtl");
+        $('.lang').each(function(index,element){
+             $(this).text(arrLang[lang][$(this).attr('key')]);
+         }); 
+		 
+    }
+
+    })
+
+    </script>
+
+
+<script>
+
+$(document).ready(function(){ 
+
+
+
+	$.ajax({
+	type: 'get',
+	dataType: 'json',
+	url: 'displayalljobs.php',
+	success:function(data) {displayjobs(data);},
+	complete:function(){displayMap();}
+	});
+	//complete mean,fire the function after success function done,without we can not fill the map div
+	var i;
+	function displayjobs(arr)
+	{
+	i=0;
+    $.each(arr, function(k,row) {
+	var lat=row.x;
+	var lang=row.y;
+	
+	
+	fillDiv(arr,k);
+	
+	});
+    
+	}
+	
+	function fillDiv(testArray,p)
+	{
+	t="<div style='border-bottom:2px solid black;padding:15px;margin-bottom:25px;margin-right:55px' class='row'>"
+  	t=t+
+	"<div class='col-md-6' >"+
+	"<div class='col-md-12' style='border-bottom:1px solid black;padding:10px'><label>Name : </label><label>&nbsp; " + testArray[p].perName + "</label></div>"+
+	"<div class='col-md-12' style='border-bottom:1px solid black;padding:10px'><label>Family : </label><label>&nbsp;"+testArray[p].perFamily + "</label></div>"+
+	"<div class='col-md-12' style='border-bottom:1px solid black;padding:10px'><label> Phone Number : </label><label>&nbsp;"+testArray[p].perPhoneNumber + "</label></div>"+
+	"<div class='col-md-12' style='border-bottom:1px solid black;padding:10px'><label> Email : </label><label>&nbsp;"+testArray[p].perUserName + "</label></div>"+
+	"<div class='col-md-12' style='border-bottom:1px solid black;padding:10px'><label> Job : </label><label>&nbsp;"+testArray[p].jobName + "</label></div>"+
+	"<div class='col-md-12' style='border-bottom:1px solid black;padding:10px'><label> Location : </label><label>&nbsp;"+testArray[p].locName + "</label></div>"+
+	"<div class='col-md-12' style='border-bottom:1px solid black;padding:10px'><label> Descreption : </label><label>&nbsp;"+testArray[p].description + "</label></div>"+
+	"<div class='col-md-12 text-center' STYLE='PADDING:10PX'> <a href='#' class='btn btn-info' id='x"+testArray[p].perId+"' data-id='x"+testArray[p].perId+"' data-lat="+testArray[p].x+" data-lang="+testArray[p].y+">"+testArray[p].perId+"</a></div></div>"+
+	"<div class='col-md-6 text-center'>"+
+	"<div class='col-md-12' style='border:1px solid black;height:400px;overflow:hidden' id=x"+testArray[p].perId+"></div></div></div>"
+	
+	$("#result").append(t);	
+	}
+	
+	$("#showloc").click(function(){
+	alert($(this).attr("data-id"));
+	});
+	
+	
+	
+	  function displayMap() { 
+	  
+	
+	   
+	   
+	   
+	   navigator.geolocation.getCurrentPosition(showPosition);
+	   
+				function showPosition(position) {
+				//a= position.coords.latitude; 
+				//b= position.coords.longitude;
+				for(j=75;j>=74;j--)
+				{
+					
+					
+					
+					
+							myIdVal=$("#x"+j).attr("data-id");
+							myLangVal=$("#x"+j).attr("data-lang");
+							myLatVal=$("#x"+j).attr("data-lat");
+alert(myIdVal+" "+myLangVal+" "+myLatVal);
+					if(!(isNaN($("#x"+j).attr("data-id"))))
+					{
+						var mapProp = {
+						center: new google.maps.LatLng(myLatVal,myLangVal),
+						zoom:15,
+						mapTypeId: google.maps.MapTypeId.ROADMAP,
+						};
+						var mapMark = {
+						position: new google.maps.LatLng(myLatVal,myLangVal),
+					
+						};
+						var map = new google.maps.Map(document.getElementById("x"+myIdVal),mapProp);
+						var marker = new google.maps.Marker({position:new google.maps.LatLng(myLatVal,myLangVal) , map: map});	   
+					}	
+				}
+				}
+	   
+	   //this section below, just to display the 3 first person, and to indicate how many pag i have to display, example
+	   //if i have 10 person should be 4 pages,3 in each, if 9 person must be 3 pages
+		var stop=$(".row .test");
+		stop.filter(function(index)
+			{
+			return index>2;
+			})
+			.css("display", "none" );
+
+	   
+		var pageNumbers="";
+		var t;
+		if(stop.length%3==0)
+		t=stop.length/3;
+		else
+		t=stop.length/3+1;
+		var j;
+		for(j=1;j<=t;j++)
+		pageNumbers+="<li><a href=#>"+j+"</a></li>";
+		$('.pagination li:first-child').after(pageNumbers);
+
+	   // end of section above
+	   return false;
+	   
+	   
+	   
+};
+	
+	$("#clickme").click(function(){
+	window.open("signup.html");
+	});
+		
+
+
+});
+	
+
+</script>
+
+<style>
+#video-background
+{
+position: relative;
+display:block;
+width: 100%;
+object-fit:fill;
+height:300px;
+margin-bottom:0px;
+}
+
+.btn-primary-outline {
+  background-color: transparent;
+  border-color: #ccc;
+  color:white;
+  width:200px;
+  border-radius:0px;
+  padding:15px;
+  border:2px solid white;
+  font-size:20px;
+}
+
+.testHide
+{
+display:none;
+}
+</style>
+<script type="text/javascript">
+function rangeSlider(value)
+{
+document.getElementById("slider-value").innerHTML=value;
+//displayMap();
+}
+
+
+</script>
+
+
+</head>
+
+<body>
+
+<div style="height:320px">
+<video id="video-background" preload="" muted="" autoplay="" loop="">
+    <source src="header-video.mp4" type="video/mp4" >
+    
+</video>
+
+<div class="container" style="position:relative;top:-175px;">
+		<h1 style="color:white" class="lang" key="ab">Select what you need to accomplish your job</h1>      
+		<p style="color:white" class="lang"  key="ba">Share us your career and Sign Up</p>
+		<div class="text-center">
+		<a href="#" class="btn btn-primary-outline lang" key="Click Me" id="clickme">Click Me</a>
+		</div>
+</div>
+</div>
+  
+<div class="container well">
+<div class="col-md-2">
+Select your Language
+	<select class="translate"  id="testLanguage">
+		<option value="en">English</option>
+		<option value="ar">Arabic</option>
+	</select>
+</div>
+<div class="col-md-1"><span id="slider-value"></span></div>
+<div class="col-md-4" id="slider">
+<input type="range" class="range" value="100" min="0" max="100" onchange="rangeSlider(this.value)" onmousemove="rangeSlider(this.value)"/>
+</div>
+<div class="col-md-2 text-center" ><button class="translate" id="en">English</button></div>
+<div class="col-md-1 text-center" ><button class="translate" id="ar">Arabic</button></div>
+<div class="col-md-1 text-center" ><button class="" id="countDiv">Count</button></div>
+</div>
+<script>
+
+$("#countDiv").click(function(){
+var stop=$(".row .test");
+stop.filter(function(index)
+			{
+			return index>2;
+			})
+			.css("display", "none" );
+
+
+//page number down means , how many page i have, eache page contain 3 div
+var pageNumbers="";
+var t;
+if(stop.length%3==0)
+t=stop.length/3;
+else
+t=stop.length/3+1;
+
+for(i=1;i<=t;i++)
+pageNumbers+="<li><a href=#>"+i+"</a></li>";
+$('.pagination li:first-child').after(pageNumbers);
+
+});
+</script>
+
+<div class="container" >	
+
+		<div  class="row" style="border:1px solid black">
+		<div class="col-md-1 col-md-offset-1"></div>
+			<div id="result" class="col-md-10">
+			
+			</div>
+		<div class="col-md-1 col-md-offset-1"></div>
+		</div>
+	
+	
+
+<div class="pagination">
+        <ul>
+            <li><a href="#" id="prev" class="prevnext">« Previous</a></li>
+            <li><a href="#" id="next" class="prevnext">Next »</a></li>
+        </ul>
+        <br />
+        <div id="page_number" class="page_number">1</div>
+    </div>
+
+</div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRXv8qnvSo2gB9DkNzI3B4d4CpLKWbkJU&callback=myMap"></script>
+
+</body>
+</html>	
